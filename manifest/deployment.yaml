@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-listener-v1
+  namespace: listener
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: app-listener-v1
+  template:
+    metadata:
+      labels:
+        app: app-listener-v1
+    spec:
+      containers:
+        - name: app-listener-v1
+          image: app-listener:v1.0
+          ports:
+            - containerPort: 8000
+          env:
+            - name: AUTHOR
+              value: "Viktor"
+            - name: UUID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.uid
+          readinessProbe:
+            httpGet:
+              path: /id
+              port: 8000
+            initialDelaySeconds: 3
+            failureThreshold: 1
+            successThreshold: 1
+            periodSeconds: 2
+          livenessProbe:
+            httpGet:
+              path: /hostname
+              port: 8000
+            initialDelaySeconds: 3
+            failureThreshold: 1
+            periodSeconds: 3
+
+
+

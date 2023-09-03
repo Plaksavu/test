@@ -1,0 +1,18 @@
+# Используем базовый образ Python
+FROM python:slim
+
+# Устанавливаем рабочую директорию
+WORKDIR /app
+
+# Копирование зависимостей в контейнер
+COPY requirements.txt requirements.txt
+
+# Устанавливаем зависимости
+RUN pip3 install --no-cache-dir -r requirements.txt
+
+# Копируем файлы приложения в контейнер
+COPY . .
+
+# Запускаем приложение
+CMD [ "python3", "app.py"]
+

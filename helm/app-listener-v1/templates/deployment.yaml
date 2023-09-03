@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "app-listener-v1.fullname" . }}
+  labels:
+    {{- include "app-listener-v1.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "app-listener-v1.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "app-listener-v1.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | indent 8 }}
+      {{- end }}
+      terminationGracePeriodSeconds: 0
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          ports:
+            - containerPort: {{ .Values.service.port }}
+          env:
+            - name: AUTHOR
+              value: {{ tpl .Values.author . | quote }}
+            - name: UUID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.uid
+          {{- with .Values.probes }}
+          {{- toYaml . | nindent 10 }}
+          {{- end}}
